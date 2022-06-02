@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Flexbench</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+</head>
+
+<body style="background-color: rgb(120, 230, 244);padding: 10px;">
+  <h3>Http traffic Stimulator</h3>
+  <hr />
+  <h5>Click below to run a simple http traffic stimulator test</h5>
+  <button id="request"
+    style="width: 160px;height: 60px;background-color: purple;color: white;border: none;font-size: 20px;border-radius: 10px;cursor: pointer;">Simple
+    Request</button>
+  <div id="result"
+    style="display:none; margin-top: 20px;border: 1px solid black;border-radius: 5px;background-color: white;padding: 10px;">
+    <label class="running-test" style="display: none;">running test...</label>
+    <h5 class="result-label" style="display: none;">Traffic Simulator Results</h5>
+    <label class="result-label" style="display: none;">-------------------------</label>
+  </div>
+</body>
+<script>
+  // const runTest = require('./httpStimulator/example/simple-request.js');
+  const { ipcRenderer } = require('electron')
+  const btn = document.getElementById("request");
+  const resultDiv = document.getElementById("result")
+  btn.addEventListener('click', () => {
+    document.querySelector("#request").disabled = true;
+    document.querySelector("#result").style.display = "block";
+    document.querySelector(".running-test").style.display = "block";
+    document.querySelector(".result-label").style.display = "none";
+    ipcRenderer.send('run:simple-request')
+    // runTest();
+  })
+  ipcRenderer.on('result', (e, stats) => {
+    document.querySelector(".running-test").style.display = "none";
+    document.querySelector(".result-label").style.display = "block";
+    var cArr = Object.keys(stats.counters);
+    for (var i = 0; i < cArr.length; i++) {
+      var key = cArr[i];
+      const p = document.createElement('p');
+      const pText = document.createTextNode(`counter ${key} : ${stats.counters[key]} `);
+      p.appendChild(pText);
+      resultDiv.appendChild(p);
+    }
+    // console.log("Exiting..");
+
+  })
+</script>
+
+</html>
